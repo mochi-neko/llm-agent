@@ -1,0 +1,52 @@
+syntax = "proto3";
+package creature;
+option csharp_namespace = "Mochineko.LLMAgent.Creature";
+
+service Creature {
+    rpc Talk (stream Talking) returns (stream State);
+}
+
+message Talking {
+    string message = 1;
+}
+
+message State {
+    Emotion emotion = 1;
+    Motion motion = 2;
+    Cry cry = 3;
+}
+
+enum Emotion {
+    EMOTION_NEUTRAL = 0;
+    EMOTION_HAPPY = 1;
+    EMOTION_SAD = 2;
+    EMOTION_ANGRY = 3;
+    EMOTION_FEARFUL = 4;
+    EMOTION_DISGUSTED = 5;
+    EMOTION_SURPRISED = 6;
+}
+
+enum Motion {
+    MOTION_NEUTRAL = 0;
+    MOTION_HAPPY = 1;
+    MOTION_SAD = 2;
+    MOTION_ANGRY = 3;
+    MOTION_FEARFUL = 4;
+    MOTION_DISGUSTED = 5;
+    MOTION_SURPRISED = 6;
+    MOTION_DANCE = 7;
+    MOTION_FLOAT = 8;
+    MOTION_SLEEP = 9;
+}
+
+enum Cry {
+    CRY_NONE = 0;
+    CRY_HAPPY = 1;
+    CRY_SAD = 2;
+    CRY_ANGRY = 3;
+    CRY_FEARFUL = 4;
+    CRY_DISGUSTED = 5;
+    CRY_SURPRISED = 6;
+    CRY_SPOILED = 7;
+    CRY_CRY = 8;
+}
