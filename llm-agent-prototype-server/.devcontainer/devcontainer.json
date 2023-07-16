@@ -6,7 +6,7 @@
   // Update the 'dockerComposeFile' list if you have more compose files or use different names.
   // The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
   "dockerComposeFile": [
-      "../compose.yaml"
+    "../compose.yaml"
   ],
   // The 'service' property is the name of the service for the container that VS Code should
   // use. Update this value and .devcontainer/docker-compose.yml to the real service name.
@@ -18,13 +18,13 @@
   "settings": {},
   // Add the IDs of extensions you want installed when the container is created.
   "extensions": [
-      "editorconfig.editorconfig",
-      "matklad.rust-analyzer",
-      "vadimcn.vscode-lldb",
-      "bungcip.better-toml",
-      "serayuzgur.crates",
-      "GitHub.copilot",
-      "zxh404.vscode-proto3"
+    "editorconfig.editorconfig",
+    "rust-lang.rust-analyzer",
+    "vadimcn.vscode-lldb",
+    "bungcip.better-toml",
+    "serayuzgur.crates",
+    "GitHub.copilot",
+    "zxh404.vscode-proto3"
   ]
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
