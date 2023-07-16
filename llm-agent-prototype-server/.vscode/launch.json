@@ -1,0 +1,45 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'llm-agent-prototype-server'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=llm-agent-prototype-server",
+          "--package=llm-agent-prototype-server"
+        ],
+        "filter": {
+          "name": "llm-agent-prototype-server",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'llm-agent-prototype-server'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=llm-agent-prototype-server",
+          "--package=llm-agent-prototype-server"
+        ],
+        "filter": {
+          "name": "llm-agent-prototype-server",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

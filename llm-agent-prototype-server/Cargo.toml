@@ -1,0 +1,11 @@
+[package]
+name = "llm-agent-prototype-server"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mochineko <t.o.e.4315@gmail.com>"]
+license = "MIT"
+description = "A prototype server for LLM Agent."
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
