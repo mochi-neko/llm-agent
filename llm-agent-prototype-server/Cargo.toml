@@ -18,9 +18,9 @@ hyper-tls = "0.5.0"
 prost = "0.11.9"
 serde = { version = "1.0.171", features = ["derive"] }
 serde_json = "1.0.103"
-tokio = "1.29.1"
+tokio = { version = "1.29.1", features = ["rt-multi-thread"] }
 tokio-stream = "0.1.14"
-tonic = "0.9.2"
+tonic = { version = "0.9.2", features = ["tls"] }
 tonic-reflection = "0.9.2"
 
 [build-dependencies]
