@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 use tonic::transport::Server;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> anyhow::Result<()> {
     let address = "0.0.0.0:8000".parse()?;
 
     // create our state

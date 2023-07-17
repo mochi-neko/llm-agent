@@ -3,6 +3,8 @@
     "com.mochineko.grpc-dotnet-unity": "https://github.com/mochi-neko/grpc-dotnet-unity.git?path=/Assets/GRPC.NET/Scripts#1.2.0",
     "com.mochineko.grpc-dotnet-unity.plugins": "https://github.com/mochi-neko/grpc-dotnet-unity.git?path=/Assets/GRPC.NET/Plugins/GRPC#1.2.0",
     "com.mochineko.grpc-dotnet-unity.editor": "https://github.com/mochi-neko/grpc-dotnet-unity.git?path=/Assets/Mochineko/gRPC.NET.Editor#1.2.0",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.neuecc.unirx": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts",
     "com.unity.burst": "1.8.7",
     "com.unity.ide.rider": "3.0.24",
     "com.unity.ide.visualstudio": "2.0.18",

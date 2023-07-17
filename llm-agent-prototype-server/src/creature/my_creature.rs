@@ -38,7 +38,7 @@ impl Creature for MyCreature {
     type TalkStream =
         Pin<Box<dyn Stream<Item = Result<creature_rpc::State, Status>> + Send + Sync + 'static>>;
 
-    // grpcurl -plaintext -d '{ "message": "おはよう!" }' localhost:8000 speak.Speak/SpeakTo
+    // grpcurl -plaintext -d '{ "message": "おはよう!" }' localhost:8000 creature.Creature/Talk
     async fn talk(
         &self,
         request: tonic::Request<tonic::Streaming<creature_rpc::Talking>>,
@@ -107,7 +107,7 @@ async fn react(
     });
 
     let context_memory = context.context_memory.get();
-    let messages = build_messages(context.prompt.clone(), context_memory);
+    let messages = build_messages(context.prompt.clone(), context_memory.clone());
     let functions = vec![Function::new(
         "reaction_generator".to_string(),
         Some("Generate reaction of AI character like Pokemon from conversations.".to_string()),
@@ -203,9 +203,9 @@ async fn react(
                 Some(function_call) => {
                     context.context_memory.add(Message {
                         role: Role::Function.parse_to_string().unwrap(),
-                        content: None,
-                        name: None,
-                        function_call: Some(function_call.clone()),
+                        content: Some(function_call.arguments.clone()),
+                        name: Some(function_call.name.clone()),
+                        function_call: None,
                     });
 
                     let reaction =
