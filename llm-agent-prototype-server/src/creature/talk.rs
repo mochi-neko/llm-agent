@@ -19,6 +19,7 @@ use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tonic::{Request, Response, Status};
+use tokio::sync::mpsc;
 
 pub struct MyCreature {
     pub(crate) state: Arc<Mutex<RpcContext>>,
@@ -29,21 +30,6 @@ struct StateJson {
     emotion: String,
     motion: String,
     cry: String,
-}
-
-struct ThreadSafeStreamWrapper {
-    stream: Arc<Mutex<tonic::Streaming<creature_rpc::Talking>>>,
-}
-
-impl ThreadSafeStreamWrapper {
-    async fn next(&self) -> Result<Option<creature_rpc::Talking>, Status> {
-        let mut message = None;
-        {
-            let mut guard = self.stream.lock().await;
-            message = guard.message().await?;
-        }
-        Ok(message)
-    }
 }
 
 #[tonic::async_trait]
@@ -59,15 +45,32 @@ impl Creature for MyCreature {
         let state = self.state.clone();
         let mut stream = request.into_inner();
 
-        let stream = async_stream::try_stream! {
-            while let Some(request) = stream.next().await {
-                let request = request?;
-                let response = self.react(request).await?;
-                yield response;
-            }
-        };
+        let (tx, rx) = mpsc::channel(100); // adjust the size as needed
 
-        Ok(Response::new(Box::pin(stream) as Self::TalkStream))
+        tokio::spawn(async move {
+            while let Some(request) = stream.next().await {
+                let request = match request {
+                    Ok(req) => req,
+                    Err(e) => {
+                        let _ = tx.send(Err(e)).await;
+                        break;
+                    }
+                };
+                let response = match self.react(request).await {
+                    Ok(resp) => resp,
+                    Err(e) => {
+                        let _ = tx.send(Err(e)).await;
+                        break;
+                    }
+                };
+                if tx.send(Ok(response)).await.is_err() {
+                    break;
+                }
+            }
+        });
+
+        let outgoing = rx.map(|res| res);
+        Ok(Response::new(Box::pin(outgoing) as Self::TalkStream))
     }
 }
 
