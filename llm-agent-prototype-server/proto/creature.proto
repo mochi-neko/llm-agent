@@ -1,6 +1,6 @@
 syntax = "proto3";
 package creature;
-option csharp_namespace = "Mochineko.LLMAgent.Creature";
+option csharp_namespace = "Mochineko.LLMAgent.Creature.Generated";
 
 service Creature {
     rpc Talk (stream Talking) returns (stream State);
