@@ -4,10 +4,8 @@ use hyper::{Body, Client, Request};
 use hyper_tls::HttpsConnector;
 use std::env;
 
+#[tracing::instrument(name = "complete_chat", err, skip(options))]
 pub(crate) async fn complete_chat(options: Options) -> Result<CompletionResult> {
-    let span = tracing::span!(tracing::Level::DEBUG, "complete chat");
-    let _enter = span.enter();
-
     if options.stream == Some(true) {
         let error = Err(anyhow::anyhow!(
             "This function is only available for stream mode"

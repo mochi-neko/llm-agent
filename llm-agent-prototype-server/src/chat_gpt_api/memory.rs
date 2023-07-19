@@ -7,6 +7,7 @@ pub(crate) trait Memory: Send + Clone {
     fn clear(&mut self);
 }
 
+#[derive(Debug)]
 pub(crate) struct FiniteQueueMemory {
     pub(crate) memories: VecDeque<Message>,
     pub(crate) max_size: usize,

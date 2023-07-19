@@ -13,12 +13,10 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tonic::transport::Server;
 
+#[tracing::instrument(name = "main", err)]
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
-
-    let span = tracing::span!(tracing::Level::DEBUG, "main");
-    let _enter = span.enter();
 
     tracing::info!("Starting server...");
 
@@ -51,6 +49,8 @@ async fn main() -> anyhow::Result<()> {
             error
         })?;
 
+    tracing::info!("Server is running on {}", address);
+
     Server::builder()
         .tls_config(crate::certification::build_tls_config().map_err(|error| {
             tracing::error!("Failed to build TLS config: {:?}", error);
@@ -68,8 +68,6 @@ async fn main() -> anyhow::Result<()> {
             tracing::error!("Failed to serve: {:?}", error);
             error
         })?;
-
-    tracing::info!("Server is running on {}", address);
 
     Ok(())
 }

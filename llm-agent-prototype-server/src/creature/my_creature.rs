@@ -22,6 +22,7 @@ use tokio::sync::{mpsc, MutexGuard};
 use tokio_stream::{wrappers::ReceiverStream, Stream};
 use tonic::{Response, Status};
 
+#[derive(Debug)]
 pub struct MyCreature {
     pub(crate) context: Arc<Mutex<RpcContext>>,
 }
@@ -39,13 +40,11 @@ impl Creature for MyCreature {
         Pin<Box<dyn Stream<Item = Result<creature_rpc::State, Status>> + Send + Sync + 'static>>;
 
     // grpcurl -plaintext -d '{ "message": "おはよう!" }' localhost:8000 creature.Creature/Talk
+    #[tracing::instrument(name = "creature.talk", err, skip(self, request))]
     async fn talk(
         &self,
         request: tonic::Request<tonic::Streaming<creature_rpc::Talking>>,
     ) -> std::result::Result<tonic::Response<Self::TalkStream>, tonic::Status> {
-        let span = tracing::span!(tracing::Level::DEBUG, "creature.talk");
-        let _enter = span.enter();
-
         tracing::info!("Request talk: {:?}", request);
 
         let mut stream = request.into_inner();
@@ -56,9 +55,6 @@ impl Creature for MyCreature {
 
         tokio::spawn(async move {
             while let Some(request) = stream.next().await {
-                let span = tracing::span!(tracing::Level::DEBUG, "creature.talk receive");
-                let _enter = span.enter();
-
                 let request = match request {
                     Ok(req) => req,
                     Err(e) => {
@@ -108,13 +104,11 @@ fn build_messages(prompt: String, context: Vec<Message>) -> Vec<Message> {
     messages
 }
 
+#[tracing::instrument(name = "creature.talk_react", err, skip(context, talking))]
 async fn react(
     mut context: MutexGuard<'_, RpcContext>,
     talking: creature_rpc::Talking,
 ) -> Result<creature_rpc::State, Status> {
-    let span = tracing::span!(tracing::Level::DEBUG, "creature.talk react");
-    let _enter = span.enter();
-
     tracing::info!("Request react to talking: {:?}", talking);
 
     context.context_memory.add(Message {

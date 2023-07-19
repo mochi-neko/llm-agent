@@ -1,6 +1,7 @@
 use crate::chat_gpt_api::memory::FiniteQueueMemory;
 use crate::chat_gpt_api::specification::Model;
 
+#[derive(Debug)]
 pub(crate) struct RpcContext {
     pub(crate) model: Model,
     pub(crate) prompt: String,
