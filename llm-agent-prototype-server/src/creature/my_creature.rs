@@ -110,7 +110,7 @@ async fn react(
     let messages = build_messages(context.prompt.clone(), context_memory.clone());
     let functions = vec![Function::new(
         "reaction_generator".to_string(),
-        Some("Generate reaction of AI character like Pokemon from conversations.".to_string()),
+        Some("Generate your reaction as character of creature from conversations.".to_string()),
         r#"{
             "type": "object",
             "properties": {
@@ -202,10 +202,10 @@ async fn react(
                 // Success
                 Some(function_call) => {
                     context.context_memory.add(Message {
-                        role: Role::Function.parse_to_string().unwrap(),
-                        content: Some(function_call.arguments.clone()),
-                        name: Some(function_call.name.clone()),
-                        function_call: None,
+                        role: Role::Assistant.parse_to_string().unwrap(),
+                        content: Some("".to_string()), // NOTE: Must be set some.
+                        name: choice.message.name.clone(),
+                        function_call: choice.message.function_call.clone(),
                     });
 
                     let reaction =
