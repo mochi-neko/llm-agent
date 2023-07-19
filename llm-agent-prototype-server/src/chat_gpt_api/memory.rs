@@ -28,13 +28,19 @@ impl Memory for FiniteQueueMemory {
     }
 
     fn add(&mut self, message: Message) {
+        tracing::debug!("Adding message to memory: {:?}", message);
+
         self.memories.push_back(message);
         while self.memories.len() > self.max_size {
+            tracing::debug!("Memory is full, removing the oldest message");
+
             self.memories.pop_front();
         }
     }
 
     fn clear(&mut self) {
+        tracing::debug!("Clearing memory");
+
         self.memories.clear();
     }
 }
