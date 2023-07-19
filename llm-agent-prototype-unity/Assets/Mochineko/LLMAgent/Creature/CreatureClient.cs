@@ -8,6 +8,7 @@ using Grpc.Net.Client;
 using UniRx;
 using Unity.Logging;
 using UnityEngine;
+using Console = System.Console;
 
 namespace Mochineko.LLMAgent.Creature
 {
@@ -64,9 +65,19 @@ namespace Mochineko.LLMAgent.Creature
             // Log.Debug("[LLMAgent.Creature] Begin to send talking: {0}", talking.Message);
             Debug.LogFormat("[LLMAgent.Creature] Begin to send talking: {0}", talking.Message);
 
-            await call
-                .RequestStream
-                .WriteAsync(talking);
+            try
+            {
+                await call
+                    .RequestStream
+                    .WriteAsync(talking);
+            }
+            catch (RpcException exception)
+            {
+                // Log.Error("[LLMAgent.Creature] Failed to send talking: {0}", exception);
+                Debug.LogErrorFormat("[LLMAgent.Creature] Failed to send talking: {0}", exception);
+                // TODO: Validate status code
+                return;
+            }
 
             // Log.Debug("[LLMAgent.Creature] Finished to send talking: {0}", talking.Message);
             Debug.LogFormat("[LLMAgent.Creature] Finished to send talking: {0}", talking.Message);
@@ -74,9 +85,28 @@ namespace Mochineko.LLMAgent.Creature
 
         private async UniTask ReceiveLoopAsync(CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested
-                   && await call.ResponseStream.MoveNext(cancellationToken))
+            while (!cancellationToken.IsCancellationRequested)
             {
+                try
+                {
+                    if (!await call.ResponseStream.MoveNext(cancellationToken))
+                    {
+                        return;
+                    }
+                }
+                catch (RpcException exception)
+                {
+                    // Log.Error("[LLMAgent.Creature] Failed to receive state: {0}", exception);
+                    Debug.LogErrorFormat("[LLMAgent.Creature] Failed to receive state: {0}", exception);
+                    // TODO: Validate status code
+                    continue;
+                }
+                catch (ObjectDisposedException)
+                {
+                    // NOTE: This exception is thrown when the client is disposed.
+                    return;
+                }
+
                 var state = call.ResponseStream.Current;
 
                 // Log.Debug("[LLMAgent.Creature] Received state: {0}, {1}, {2}", state.Emotion, state.Motion, state.Cry);
