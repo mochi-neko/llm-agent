@@ -207,10 +207,10 @@ async fn process_chunk(
         Err(e) => {
             eprintln!("Failed to parse JSON: {}", e);
             tx.send(Err(anyhow::Error::new(e)))?;
-            return Err(anyhow::anyhow!("Failed to parse JSON"));
+            Err(anyhow::anyhow!("Failed to parse JSON"))
         }
         Ok(chunk_object) => match chunk_object.choices.get(0) {
-            None => return Err(anyhow::anyhow!("No choices")),
+            None => Err(anyhow::anyhow!("No choices")),
             Some(chunk_choice) => {
                 if chunk_choice.finish_reason.is_some() {
                     if verbose {
@@ -232,12 +232,12 @@ async fn process_chunk(
                         if let Err(e) = tx.send(Err(anyhow::anyhow!("No content"))) {
                             eprintln!("Failed to send error: {:?}", e);
                         }
-                        return Err(anyhow::anyhow!("No content"));
+                        Err(anyhow::anyhow!("No content"))
                     }
                     Some(content) => {
                         if let Err(e) = tx.send(Ok(content.clone())) {
                             eprintln!("Failed to send message: {:?}", e);
-                            return Err(anyhow::anyhow!("Failed to send message"));
+                            Err(anyhow::anyhow!("Failed to send message"))
                         } else {
                             // Succeeded to send message
                             Ok(content)
