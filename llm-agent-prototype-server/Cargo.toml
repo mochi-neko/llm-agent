@@ -10,21 +10,25 @@ build = "src/build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ansi_term = "0.12.1"
 anyhow = "1.0.72"
 async-stream = "0.3.5"
+chrono = "0.4.26"
 futures = "0.3.28"
 hyper = "0.14.27"
 hyper-tls = "0.5.0"
 prost = "0.11.9"
 serde = { version = "1.0.171", features = ["derive"] }
 serde_json = "1.0.103"
+thread-id = "4.1.0"
 tokio = { version = "1.29.1", features = ["rt-multi-thread"] }
 tokio-stream = "0.1.14"
 tonic = { version = "0.9.2", features = ["tls"] }
 tonic-reflection = "0.9.2"
 tracing = "0.1.37"
+tracing-appender = "0.2.2"
 tracing-futures = "0.2.5"
-tracing-subscriber = "0.3.17"
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
 
 [build-dependencies]
 tonic-build = "0.9.2"

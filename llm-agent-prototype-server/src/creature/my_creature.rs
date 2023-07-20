@@ -5,12 +5,10 @@ pub(crate) mod creature_rpc {
         tonic::include_file_descriptor_set!("creature_descriptor");
 }
 
-use crate::chat_gpt_api::client::complete_chat;
 use crate::chat_gpt_api::memory::Memory;
 use crate::chat_gpt_api::specification::{
     Function, FunctionCallingSpecification, Message, Options, Role,
 };
-use crate::error_conversion::map_anyhow_error_to_grpc_status;
 use crate::rpc_context::RpcContext;
 use creature_rpc::creature_server::Creature;
 use creature_rpc::{Cry, Emotion, Motion};
@@ -198,13 +196,12 @@ async fn react(
 
     tracing::info!("Request complete chat to react with options: {:?}", options);
 
-    match complete_chat(options).await {
+    match crate::chat_gpt_api::client::complete_chat(options).await {
         Err(error) => {
             tracing::error!("Failed to complete chat to react: {:?}", error);
-            Err(map_anyhow_error_to_grpc_status(anyhow::anyhow!(
-                "Failed to complete chat to react: {:?}",
-                error
-            )))
+            Err(crate::error_mapping::map_anyhow_error_to_grpc_status(
+                anyhow::anyhow!("Failed to complete chat to react: {:?}", error),
+            ))
         }
         Ok(response) => match response.choices.get(0) {
             None => {

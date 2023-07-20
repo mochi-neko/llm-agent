@@ -1,7 +1,8 @@
 mod certification;
 mod chat_gpt_api;
 mod creature;
-mod error_conversion;
+mod error_mapping;
+mod logging;
 mod rpc_context;
 
 use crate::chat_gpt_api::memory::FiniteQueueMemory;
@@ -16,7 +17,10 @@ use tonic::transport::Server;
 #[tracing::instrument(name = "main", err)]
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
+    crate::logging::initialize_logging().map_err(|error| {
+        tracing::error!("Failed to initialize logging: {:?}", error);
+        error
+    })?;
 
     tracing::info!("Starting server...");
 
