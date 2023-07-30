@@ -77,3 +77,6 @@ crashlytics-build.properties
 # NuGetForUnity
 /[Aa]ssets/[Pp]ackages/
 /[Aa]ssets/[Pp]ackages.meta
+
+# 3D Model Assets
+/[Aa]ssets/[Mm]ochineko/[Ll][Ll][Mm][Aa]gent/[Mm]odels
