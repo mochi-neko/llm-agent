@@ -70,16 +70,52 @@ namespace Mochineko.LLMAgent.Creature
                     .RequestStream
                     .WriteAsync(talking, cancellationToken);
             }
-            catch (RpcException exception)
-            {
-                Log.Error("[LLMAgent.Creature] Failed to send talking: {0}", exception);
-                // TODO: Validate status code
-                return;
-            }
             catch (OperationCanceledException)
             {
                 Log.Debug("[LLMAgent.Creature] Finished to send talking with cancellation.");
                 return;
+            }
+            catch (RpcException exception)
+            {
+                switch (exception.StatusCode)
+                {
+                    // Cancelled
+                    case StatusCode.Cancelled:
+                        Log.Debug("[LLMAgent.Creature] Finished to send talking with cancellation: {0}.",
+                            exception);
+                        return;
+
+                    // Failed
+                    case StatusCode.Unknown:
+                    case StatusCode.DeadlineExceeded:
+                    case StatusCode.FailedPrecondition:
+                    case StatusCode.Aborted:
+                    case StatusCode.Internal:
+                    case StatusCode.Unavailable:
+                    case StatusCode.DataLoss:
+                        Log.Error("[LLMAgent.Creature] Failed to send talking with status code: {0}, {1}",
+                            exception.StatusCode, exception);
+                        return;
+
+                    // Fatal
+                    case StatusCode.OK:
+                    case StatusCode.NotFound:
+                    case StatusCode.InvalidArgument:
+                    case StatusCode.Unimplemented:
+                    case StatusCode.AlreadyExists:
+                    case StatusCode.PermissionDenied:
+                    case StatusCode.ResourceExhausted:
+                    case StatusCode.OutOfRange:
+                    case StatusCode.Unauthenticated:
+                        Log.Fatal("[LLMAgent.Creature] Failed to send talking with unexpected status code: {0}, {1}",
+                            exception.StatusCode, exception);
+                        throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode, null);
+
+                    default:
+                        Log.Fatal("[LLMAgent.Creature] Failed to send talking with undefined status code: {0}, {1}",
+                            exception.StatusCode, exception);
+                        throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode, null);
+                }
             }
 
             // Log.Info("[LLMAgent.Creature] Finished to send talking: {0}", talking.Message);
@@ -98,12 +134,6 @@ namespace Mochineko.LLMAgent.Creature
                         return;
                     }
                 }
-                catch (RpcException exception)
-                {
-                    Log.Error("[LLMAgent.Creature] Failed to receive state: {0}", exception);
-                    // TODO: Validate status code
-                    continue;
-                }
                 catch (OperationCanceledException)
                 {
                     Log.Debug("[LLMAgent.Creature] Finished to receive state with cancellation.");
@@ -113,6 +143,52 @@ namespace Mochineko.LLMAgent.Creature
                 {
                     Log.Debug("[LLMAgent.Creature] Finished to receive state with disposing client.");
                     return;
+                }
+                catch (RpcException exception)
+                {
+                    switch (exception.StatusCode)
+                    {
+                        // Cancelled
+                        case StatusCode.Cancelled:
+                            Log.Debug("[LLMAgent.Creature] Finished to receive state with cancellation: {0}.",
+                                exception);
+                            return;
+
+                        // Failed
+                        case StatusCode.Unknown:
+                        case StatusCode.DeadlineExceeded:
+                        case StatusCode.FailedPrecondition:
+                        case StatusCode.Aborted:
+                        case StatusCode.Internal:
+                        case StatusCode.Unavailable:
+                        case StatusCode.DataLoss:
+                            Log.Error("[LLMAgent.Creature] Failed to receive state with status code: {0}, {1}",
+                                exception.StatusCode, exception);
+                            return;
+
+                        // Fatal
+                        case StatusCode.OK:
+                        case StatusCode.NotFound:
+                        case StatusCode.InvalidArgument:
+                        case StatusCode.Unimplemented:
+                        case StatusCode.AlreadyExists:
+                        case StatusCode.PermissionDenied:
+                        case StatusCode.ResourceExhausted:
+                        case StatusCode.OutOfRange:
+                        case StatusCode.Unauthenticated:
+                            Log.Fatal(
+                                "[LLMAgent.Creature] Failed to receive state with unexpected status code: {0}, {1}",
+                                exception.StatusCode, exception);
+                            throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode,
+                                null);
+
+                        default:
+                            Log.Fatal(
+                                "[LLMAgent.Creature] Failed to receive state with undefined status code: {0}, {1}",
+                                exception.StatusCode, exception);
+                            throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode,
+                                null);
+                    }
                 }
 
                 var state = call.ResponseStream.Current;
