@@ -107,12 +107,12 @@ namespace Mochineko.LLMAgent.Creature
                     case StatusCode.Unauthenticated:
                         Log.Fatal("[LLMAgent.Creature] Failed to send talking with unexpected status code: {0}, {1}",
                             exception.StatusCode, exception);
-                        throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode, null);
+                        throw;
 
                     default:
                         Log.Fatal("[LLMAgent.Creature] Failed to send talking with undefined status code: {0}, {1}",
                             exception.StatusCode, exception);
-                        throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode, null);
+                        throw;
                 }
             }
 
@@ -182,15 +182,13 @@ namespace Mochineko.LLMAgent.Creature
                             Log.Fatal(
                                 "[LLMAgent.Creature] Failed to receive state with unexpected status code: {0}, {1}",
                                 exception.StatusCode, exception);
-                            throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode,
-                                null);
+                            throw;
 
                         default:
                             Log.Fatal(
                                 "[LLMAgent.Creature] Failed to receive state with undefined status code: {0}, {1}",
                                 exception.StatusCode, exception);
-                            throw new ArgumentOutOfRangeException(nameof(exception.StatusCode), exception.StatusCode,
-                                null);
+                            throw;
                     }
                 }
 

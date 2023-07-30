@@ -141,14 +141,14 @@ async fn react(
                     "enum": [
                         "MOTION_NEUTRAL",
                         "MOTION_HAPPY",
-                        "MOTION_SAD",
-                        "MOTION_ANGRY",
-                        "MOTION_FEARFUL",
-                        "MOTION_DISGUSTED",
-                        "MOTION_SURPRISED",
-                        "MOTION_DANCE",
-                        "MOTION_FLOAT",
-                        "MOTION_SLEEP"
+                        "MOTION_NO",
+                        "MOTION_JUMP",
+                        "MOTION_DIE",
+                        "MOTION_RUN",
+                        "MOTION_WALK",
+                        "MOTION_FLYING",
+                        "MOTION_ATTACK",
+                        "MOTION_EATING"
                     ]
                 },
                 "cry": {

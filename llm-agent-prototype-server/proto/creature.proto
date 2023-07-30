@@ -29,14 +29,14 @@ enum Emotion {
 enum Motion {
     MOTION_NEUTRAL = 0;
     MOTION_HAPPY = 1;
-    MOTION_SAD = 2;
-    MOTION_ANGRY = 3;
-    MOTION_FEARFUL = 4;
-    MOTION_DISGUSTED = 5;
-    MOTION_SURPRISED = 6;
-    MOTION_DANCE = 7;
-    MOTION_FLOAT = 8;
-    MOTION_SLEEP = 9;
+    MOTION_NO = 2;
+    MOTION_JUMP = 3;
+    MOTION_DIE = 4;
+    MOTION_RUN = 5;
+    MOTION_WALK = 6;
+    MOTION_FLYING = 7;
+    MOTION_ATTACK = 8;
+    MOTION_EATING = 9;
 }
 
 enum Cry {
