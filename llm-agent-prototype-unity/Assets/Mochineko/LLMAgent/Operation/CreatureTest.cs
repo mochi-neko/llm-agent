@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using Cysharp.Threading.Tasks;
 using GRPC.NET;
 using Mochineko.LLMAgent.Creature;
@@ -20,14 +21,19 @@ namespace Mochineko.LLMAgent.Operation
         private CreatureClient? client;
         private static readonly GRPCBestHttpHandler httpHandler = new();
 
+        private void Awake()
+        {
+            Logging.Initialize();
+        }
+
         private void Start()
         {
             client = new CreatureClient(address, httpHandler);
 
             client
                 .OnStateReceived
-                .Subscribe(state => Log.Debug(
-                    "[LLMAgent.Creature] Received state: {0}, {1}, {2}",
+                .Subscribe(state => Log.Info(
+                    "[LLMAgent.Operation] Received state: {0}, {1}, {2}",
                     state.Emotion, state.Motion, state.Cry))
                 .AddTo(this);
         }
@@ -35,11 +41,15 @@ namespace Mochineko.LLMAgent.Operation
         private void OnDestroy()
         {
             client?.Dispose();
+            Log.FlushAll();
         }
 
         [ContextMenu(nameof(Send))]
         public void Send()
         {
+            // Log.Info("[LLMAgent.Operation] Send message: {0}", message);
+            Debug.LogFormat("[LLMAgent.Operation] Send message: {0}", message);
+
             client?.Send(new Talking()
                 {
                     Message = message

@@ -25,16 +25,17 @@ namespace Mochineko.LLMAgent.Creature
         {
             if (string.IsNullOrEmpty(address))
             {
+                Log.Fatal("[LLMAgent.Creature] Address is empty.");
                 throw new ArgumentOutOfRangeException(nameof(address));
             }
 
             if (!address.StartsWith("https://"))
             {
+                Log.Fatal("[LLMAgent.Creature] Address must start with \"https://\".");
                 throw new ArgumentOutOfRangeException(nameof(address));
             }
 
-            // Log.Debug("[LLMAgent.Creature] Begin to connect gRPC to {0}", address);
-            Debug.LogFormat("[LLMAgent.Creature] Begin to connect gRPC to {0}", address);
+            Log.Info("[LLMAgent.Creature] Begin to connect gRPC to {0}", address);
 
             this.channel = GrpcChannel.ForAddress(address, new GrpcChannelOptions()
             {
@@ -48,8 +49,7 @@ namespace Mochineko.LLMAgent.Creature
             ReceiveLoopAsync(cancellationTokenSource.Token)
                 .Forget();
 
-            // Log.Debug("[LLMAgent.Creature] Succeeded to connect gRPC to {0}", address);
-            Debug.LogFormat("[LLMAgent.Creature] Succeeded to connect gRPC to {0}", address);
+            Log.Info("[LLMAgent.Creature] Succeeded to connect gRPC to {0}", address);
         }
 
         public void Dispose()
@@ -62,7 +62,7 @@ namespace Mochineko.LLMAgent.Creature
 
         public async UniTask Send(Generated.Talking talking)
         {
-            // Log.Debug("[LLMAgent.Creature] Begin to send talking: {0}", talking.Message);
+            // Log.Info("[LLMAgent.Creature] Begin to send talking: {0}", talking.Message);
             Debug.LogFormat("[LLMAgent.Creature] Begin to send talking: {0}", talking.Message);
 
             try
@@ -73,13 +73,12 @@ namespace Mochineko.LLMAgent.Creature
             }
             catch (RpcException exception)
             {
-                // Log.Error("[LLMAgent.Creature] Failed to send talking: {0}", exception);
-                Debug.LogErrorFormat("[LLMAgent.Creature] Failed to send talking: {0}", exception);
+                Log.Error("[LLMAgent.Creature] Failed to send talking: {0}", exception);
                 // TODO: Validate status code
                 return;
             }
 
-            // Log.Debug("[LLMAgent.Creature] Finished to send talking: {0}", talking.Message);
+            // Log.Info("[LLMAgent.Creature] Finished to send talking: {0}", talking.Message);
             Debug.LogFormat("[LLMAgent.Creature] Finished to send talking: {0}", talking.Message);
         }
 
@@ -91,26 +90,31 @@ namespace Mochineko.LLMAgent.Creature
                 {
                     if (!await call.ResponseStream.MoveNext(cancellationToken))
                     {
+                        Log.Info("[LLMAgent.Creature] Finished to receive state.");
                         return;
                     }
                 }
                 catch (RpcException exception)
                 {
-                    // Log.Error("[LLMAgent.Creature] Failed to receive state: {0}", exception);
-                    Debug.LogErrorFormat("[LLMAgent.Creature] Failed to receive state: {0}", exception);
+                    Log.Error("[LLMAgent.Creature] Failed to receive state: {0}", exception);
                     // TODO: Validate status code
                     continue;
                 }
+                catch (OperationCanceledException)
+                {
+                    Log.Debug("[LLMAgent.Creature] Finished to receive state with cancellation.");
+                    return;
+                }
                 catch (ObjectDisposedException)
                 {
-                    // NOTE: This exception is thrown when the client is disposed.
+                    Log.Debug("[LLMAgent.Creature] Finished to receive state with disposing client.");
                     return;
                 }
 
                 var state = call.ResponseStream.Current;
 
-                // Log.Debug("[LLMAgent.Creature] Received state: {0}, {1}, {2}", state.Emotion, state.Motion, state.Cry);
-                Debug.LogFormat("[LLMAgent.Creature] Received state: {0}, {1}, {2}", state.Emotion, state.Motion, state.Cry);
+                Log.Info("[LLMAgent.Creature] Received state: {0}, {1}, {2}",
+                    state.Emotion, state.Motion, state.Cry);
 
                 onStateReceived.OnNext(state);
             }
