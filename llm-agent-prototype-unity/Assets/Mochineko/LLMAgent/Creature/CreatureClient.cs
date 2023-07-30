@@ -59,7 +59,7 @@ namespace Mochineko.LLMAgent.Creature
             channel.Dispose();
         }
 
-        public async UniTask Send(Generated.Talking talking)
+        public async UniTask Send(Generated.Talking talking, CancellationToken cancellationToken)
         {
             // Log.Info("[LLMAgent.Creature] Begin to send talking: {0}", talking.Message);
             Debug.LogFormat("[LLMAgent.Creature] Begin to send talking: {0}", talking.Message);
@@ -68,12 +68,17 @@ namespace Mochineko.LLMAgent.Creature
             {
                 await call
                     .RequestStream
-                    .WriteAsync(talking);
+                    .WriteAsync(talking, cancellationToken);
             }
             catch (RpcException exception)
             {
                 Log.Error("[LLMAgent.Creature] Failed to send talking: {0}", exception);
                 // TODO: Validate status code
+                return;
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Debug("[LLMAgent.Creature] Finished to send talking with cancellation.");
                 return;
             }
 

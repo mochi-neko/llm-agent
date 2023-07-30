@@ -1,5 +1,4 @@
 #nullable enable
-using System;
 using Cysharp.Net.Http;
 using Cysharp.Threading.Tasks;
 using Mochineko.LLMAgent.Creature;
@@ -50,10 +49,11 @@ namespace Mochineko.LLMAgent.Operation
             // Log.Info("[LLMAgent.Operation] Send message: {0}", message);
             Debug.LogFormat("[LLMAgent.Operation] Send message: {0}", message);
 
-            client?.Send(new Talking()
-                {
-                    Message = message
-                })
+            client?.Send(new Talking
+                    {
+                        Message = message
+                    },
+                    this.GetCancellationTokenOnDestroy())
                 .Forget();
         }
     }
