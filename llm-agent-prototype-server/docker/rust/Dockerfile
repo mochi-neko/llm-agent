@@ -12,4 +12,4 @@ RUN cd /tmp/ && wget https://github.com/fullstorydev/grpcurl/releases/download/v
     tar -xf grpcurl_1.8.0_linux_x86_64.tar.gz && \
     mv grpcurl /usr/local/bin/
 
-EXPOSE 8000
+EXPOSE 50051

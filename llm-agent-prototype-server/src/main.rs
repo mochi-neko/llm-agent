@@ -24,7 +24,7 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("Starting server...");
 
-    let address = "0.0.0.0:8000".parse().map_err(|error| {
+    let address = "0.0.0.0:50051".parse().map_err(|error| {
         tracing::error!("Failed to parse address: {:?}", error);
         error
     })?;
