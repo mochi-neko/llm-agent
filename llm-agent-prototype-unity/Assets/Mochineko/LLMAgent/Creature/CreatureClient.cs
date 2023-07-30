@@ -47,8 +47,6 @@ namespace Mochineko.LLMAgent.Creature
 
             ReceiveLoopAsync(cancellationTokenSource.Token)
                 .Forget();
-
-            Log.Info("[LLMAgent.Creature] Succeeded to connect gRPC to {0}", address);
         }
 
         public void Dispose()
