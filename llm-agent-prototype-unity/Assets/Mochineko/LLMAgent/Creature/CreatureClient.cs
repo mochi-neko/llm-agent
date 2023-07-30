@@ -148,6 +148,14 @@ namespace Mochineko.LLMAgent.Creature
                 {
                     switch (exception.StatusCode)
                     {
+                        // Continue
+                        case StatusCode.FailedPrecondition:
+                        case StatusCode.Unavailable:
+                        case StatusCode.DataLoss:
+                            Log.Debug("[LLMAgent.Creature] Continue to receive state with status code: {0}, {1}",
+                                exception.StatusCode, exception);
+                            continue;
+
                         // Cancelled
                         case StatusCode.Cancelled:
                             Log.Debug("[LLMAgent.Creature] Finished to receive state with cancellation: {0}.",
@@ -157,11 +165,8 @@ namespace Mochineko.LLMAgent.Creature
                         // Failed
                         case StatusCode.Unknown:
                         case StatusCode.DeadlineExceeded:
-                        case StatusCode.FailedPrecondition:
                         case StatusCode.Aborted:
                         case StatusCode.Internal:
-                        case StatusCode.Unavailable:
-                        case StatusCode.DataLoss:
                             Log.Error("[LLMAgent.Creature] Failed to receive state with status code: {0}, {1}",
                                 exception.StatusCode, exception);
                             return;
