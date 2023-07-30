@@ -1,7 +1,7 @@
 #nullable enable
 using System;
+using Cysharp.Net.Http;
 using Cysharp.Threading.Tasks;
-using GRPC.NET;
 using Mochineko.LLMAgent.Creature;
 using Mochineko.LLMAgent.Creature.Generated;
 using UniRx;
@@ -19,7 +19,7 @@ namespace Mochineko.LLMAgent.Operation
         private string message = string.Empty;
 
         private CreatureClient? client;
-        private static readonly GRPCBestHttpHandler httpHandler = new();
+        private static readonly YetAnotherHttpHandler httpHandler = new();
 
         private void Awake()
         {

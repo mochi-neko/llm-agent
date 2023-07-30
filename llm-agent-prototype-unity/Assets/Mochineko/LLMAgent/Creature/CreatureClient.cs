@@ -1,14 +1,13 @@
 #nullable enable
 using System;
+using System.Net.Http;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Grpc.Core;
-using GRPC.NET;
 using Grpc.Net.Client;
 using UniRx;
 using Unity.Logging;
 using UnityEngine;
-using Console = System.Console;
 
 namespace Mochineko.LLMAgent.Creature
 {
@@ -21,7 +20,7 @@ namespace Mochineko.LLMAgent.Creature
         private readonly Subject<Generated.State> onStateReceived = new();
         public IObservable<Generated.State> OnStateReceived => onStateReceived;
 
-        public CreatureClient(string address, GRPCBestHttpHandler httpHandler)
+        public CreatureClient(string address, HttpMessageHandler httpHandler)
         {
             if (string.IsNullOrEmpty(address))
             {
