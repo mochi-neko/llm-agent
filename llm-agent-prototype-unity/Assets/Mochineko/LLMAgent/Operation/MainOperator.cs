@@ -5,17 +5,22 @@ using Cysharp.Net.Http;
 using Cysharp.Threading.Tasks;
 using Mochineko.LLMAgent.Creature;
 using Mochineko.LLMAgent.Creature.Generated;
+using TMPro;
 using UniRx;
 using Unity.Logging;
 using UnityEngine;
+using UnityEngine.UI;
 using Motion = Mochineko.LLMAgent.Creature.Generated.Motion;
 
 namespace Mochineko.LLMAgent.Operation
 {
-    internal sealed class CreatureTest : MonoBehaviour
+    internal sealed class MainOperator : MonoBehaviour
     {
         [SerializeField]
-        private string message = string.Empty;
+        private TMP_InputField? messageInput = null;
+
+        [SerializeField]
+        private Button? sendMessageButton = null;
 
         [SerializeField]
         private Animator? animator = null;
@@ -36,6 +41,16 @@ namespace Mochineko.LLMAgent.Operation
 
         private void Start()
         {
+            if (messageInput == null)
+            {
+                throw new NullReferenceException(nameof(messageInput));
+            }
+
+            if (sendMessageButton == null)
+            {
+                throw new NullReferenceException(nameof(sendMessageButton));
+            }
+
             if (animator == null)
             {
                 throw new NullReferenceException(nameof(animator));
@@ -47,6 +62,11 @@ namespace Mochineko.LLMAgent.Operation
                 .OnStateReceived
                 .Subscribe(OnStateReceived)
                 .AddTo(this);
+
+            sendMessageButton
+                .OnClickAsObservable()
+                .Subscribe(_ => SendMessage())
+                .AddTo(this);
         }
 
         private void OnDestroy()
@@ -55,15 +75,19 @@ namespace Mochineko.LLMAgent.Operation
             Log.FlushAll();
         }
 
-        [ContextMenu(nameof(Send))]
-        public void Send()
+        public void SendMessage()
         {
-            // Log.Info("[LLMAgent.Operation] Send message: {0}", message);
-            Debug.LogFormat("[LLMAgent.Operation] Send message: {0}", message);
+            if (messageInput == null)
+            {
+                throw new NullReferenceException(nameof(messageInput));
+            }
+
+            // Log.Info("[LLMAgent.Operation] Send message: {0}", messageInput.text);
+            Debug.LogFormat("[LLMAgent.Operation] Send message: {0}", messageInput.text);
 
             client?.Send(new Talking
                     {
-                        Message = message
+                        Message = messageInput.text
                     },
                     this.GetCancellationTokenOnDestroy())
                 .Forget();
