@@ -97,6 +97,10 @@ impl DataBase {
                 error
             })?;
 
+        tracing::info!(
+            "Reset database of {} successfully",
+            self.name
+        );
         Ok(())
     }
 
@@ -110,7 +114,7 @@ impl DataBase {
         text: String,
         meta_data: MetaData,
     ) -> Result<()> {
-        let embedding = embeddings::embed(text)
+        let embedding = embeddings::embed(text.clone())
             .await
             .map_err(|error| {
                 tracing::error!("Failed to embed text: {:?}", error);
@@ -129,6 +133,11 @@ impl DataBase {
                 error
             })?;
 
+        tracing::info!(
+            "Upserted {} to {} successfully",
+            text,
+            self.name
+        );
         Ok(())
     }
 
@@ -143,7 +152,7 @@ impl DataBase {
         count_limit: u64,
         filter: Option<Filter>,
     ) -> Result<Vec<ScoredPoint>> {
-        let embedding = embeddings::embed(query)
+        let embedding = embeddings::embed(query.clone())
             .await
             .map_err(|error| {
                 tracing::error!("Failed to embed query: {:?}", error);
@@ -167,6 +176,12 @@ impl DataBase {
                 error
             })?;
 
+        tracing::info!(
+            "Searched {}'s results by query: {} from {} successfully",
+            result.result.len(),
+            query,
+            self.name
+        );
         Ok(result.result)
     }
 }
