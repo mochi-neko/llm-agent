@@ -31,6 +31,7 @@ struct StateJson {
     emotion: String,
     motion: String,
     cry: String,
+    friendliness: f64,
 }
 
 #[tonic::async_trait]
@@ -222,12 +223,19 @@ async fn react(
                         "CRY_SPOILED",
                         "CRY_CRY"
                     ]
+                },
+                "friendliness" : {
+                    "type": "number",
+                    "description": "Friendliness of creature that changes slowly by user interaction.",
+                    "minimum": -1,
+                    "maximum": 1
                 }
             },
             "required": [
                 "emotion",
                 "motion",
-                "cry"
+                "cry",
+                "friendliness"
             ]
         }"#
         .to_string(),
