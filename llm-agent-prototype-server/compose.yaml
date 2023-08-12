@@ -4,13 +4,22 @@ services:
       context: .
       dockerfile: docker/rust/Dockerfile
     tty: true
-    working_dir: /workspace
     volumes:
       - .:/workspace
     env_file:
       - .env
     ports:
       - 50051:50051
+  qdrant:
+    build:
+      context: .
+      dockerfile: docker/qdrant/Dockerfile
+    volumes:
+      - .db:/qdrant/storage
+    env_file:
+      - .env
+    ports:
+      - 6334:6334
 
 volumes:
   rust-target:
