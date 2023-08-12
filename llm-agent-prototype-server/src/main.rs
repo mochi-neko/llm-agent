@@ -11,9 +11,11 @@ use crate::chat_gpt_api::specification::Model;
 use crate::creature::my_creature::creature_rpc::creature_server::CreatureServer;
 use crate::creature::my_creature::MyCreature;
 use crate::rpc_context::RpcContext;
+use qdrant_client::prelude::QdrantClient;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tonic::transport::Server;
+use vector_db::database::DataBase;
 
 #[tracing::instrument(name = "main", err)]
 #[tokio::main]
@@ -39,10 +41,25 @@ async fn main() -> anyhow::Result<()> {
     let model = Model::Gpt35Turbo0613;
     let prompt = "Your are an AI assistant.".to_string();
     let context_memory = FiniteQueueMemory::new(10);
+    let qdrant_client = QdrantClient::from_url("http://127.0.0.1:6334")
+        .build()
+        .map_err(|error| {
+            tracing::error!(
+                "Failed to create qdrant client: {:?}",
+                error
+            );
+            error
+        })?;
+    let long_memory = DataBase {
+        client: qdrant_client,
+        name: "long_memory".to_string(),
+        index: 0,
+    };
     let rpc_context = Arc::new(Mutex::new(RpcContext {
         model,
         prompt,
         context_memory,
+        long_memory,
     }));
 
     let creature = MyCreature {
