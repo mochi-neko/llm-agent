@@ -10,6 +10,7 @@ use crate::chat_gpt_api::specification::{
     Function, FunctionCallingSpecification, Message, Options, Role,
 };
 use crate::rpc_context::RpcContext;
+use crate::vector_db::database::MetaData;
 use creature_rpc::creature_server::Creature;
 use creature_rpc::{Cry, Emotion, Motion};
 use futures::stream::StreamExt;
@@ -147,10 +148,28 @@ async fn react(
             role: Role::User
                 .parse_to_string()
                 .unwrap(),
-            content: Some(talking.message),
+            content: Some(talking.message.clone()),
             name: None,
             function_call: None,
         });
+
+    context
+        .long_memory
+        .upsert(
+            talking.message,
+            MetaData::new("Mochineko".to_string()), // TODO: Set author from parameters.
+        )
+        .await
+        .map_err(|error| {
+            tracing::error!(
+                "Failed to upsert message to long memory: {:?}",
+                error
+            );
+            Status::new(
+                tonic::Code::Internal,
+                "Failed to upsert to long memory".to_string(),
+            )
+        })?;
 
     let context_memory = context.context_memory.get();
     let messages = build_messages(

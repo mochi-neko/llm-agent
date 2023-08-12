@@ -20,6 +20,13 @@ pub(crate) struct MetaData {
 }
 
 impl MetaData {
+    pub(crate) fn new(author: String) -> Self {
+        Self {
+            datetime: Utc::now(),
+            author,
+        }
+    }
+
     fn to_payload(&self) -> Payload {
         let mut map = HashMap::new();
         map.insert(
