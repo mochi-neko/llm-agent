@@ -4,6 +4,7 @@ mod creature;
 mod error_mapping;
 mod logging;
 mod rpc_context;
+mod vector_db;
 
 use crate::chat_gpt_api::memory::FiniteQueueMemory;
 use crate::chat_gpt_api::specification::Model;
@@ -18,16 +19,21 @@ use tonic::transport::Server;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     crate::logging::initialize_logging().map_err(|error| {
-        tracing::error!("Failed to initialize logging: {:?}", error);
+        tracing::error!(
+            "Failed to initialize logging: {:?}",
+            error
+        );
         error
     })?;
 
     tracing::info!("Starting server...");
 
-    let address = "0.0.0.0:50051".parse().map_err(|error| {
-        tracing::error!("Failed to parse address: {:?}", error);
-        error
-    })?;
+    let address = "0.0.0.0:50051"
+        .parse()
+        .map_err(|error| {
+            tracing::error!("Failed to parse address: {:?}", error);
+            error
+        })?;
 
     // create our state
     let model = Model::Gpt35Turbo0613;
@@ -49,17 +55,25 @@ async fn main() -> anyhow::Result<()> {
         )
         .build()
         .map_err(|error| {
-            tracing::error!("Failed to create reflection server: {:?}", error);
+            tracing::error!(
+                "Failed to create reflection server: {:?}",
+                error
+            );
             error
         })?;
 
     tracing::info!("Server is running on {}", address);
 
     Server::builder()
-        .tls_config(crate::certification::build_tls_config().map_err(|error| {
-            tracing::error!("Failed to build TLS config: {:?}", error);
-            error
-        })?)
+        .tls_config(
+            crate::certification::build_tls_config().map_err(|error| {
+                tracing::error!(
+                    "Failed to build TLS config: {:?}",
+                    error
+                );
+                error
+            })?,
+        )
         .map_err(|error| {
             tracing::error!("Failed to create server: {:?}", error);
             error

@@ -18,6 +18,8 @@ futures = "0.3.28"
 hyper = "0.14.27"
 hyper-tls = "0.5.0"
 prost = "0.11.9"
+qdrant-client = "1.4.0"
+rust-bert = "0.21.0"
 serde = { version = "1.0.171", features = ["derive"] }
 serde_json = "1.0.103"
 thread-id = "4.1.0"

@@ -34,15 +34,26 @@ struct StateJson {
 
 #[tonic::async_trait]
 impl Creature for MyCreature {
-    type TalkStream =
-        Pin<Box<dyn Stream<Item = Result<creature_rpc::State, Status>> + Send + Sync + 'static>>;
+    type TalkStream = Pin<
+        Box<
+            dyn Stream<Item = Result<creature_rpc::State, Status>>
+                + Send
+                + Sync
+                + 'static,
+        >,
+    >;
 
     // grpcurl -plaintext -d '{ "message": "おはよう!" }' localhost:8000 creature.Creature/Talk
-    #[tracing::instrument(name = "creature.talk", err, skip(self, request))]
+    #[tracing::instrument(
+        name = "creature.talk",
+        err,
+        skip(self, request)
+    )]
     async fn talk(
         &self,
         request: tonic::Request<tonic::Streaming<creature_rpc::Talking>>,
-    ) -> std::result::Result<tonic::Response<Self::TalkStream>, tonic::Status> {
+    ) -> std::result::Result<tonic::Response<Self::TalkStream>, tonic::Status>
+    {
         tracing::info!("Request talk: {:?}", request);
 
         let mut stream = request.into_inner();
@@ -54,23 +65,27 @@ impl Creature for MyCreature {
         tokio::spawn(async move {
             while let Some(request) = stream.next().await {
                 let request = match request {
-                    Ok(req) => req,
-                    Err(e) => {
+                    | Ok(req) => req,
+                    | Err(e) => {
                         tracing::error!("Failed to receive request: {:?}", e);
                         let _ = tx.send(Err(e)).await;
                         break;
-                    }
+                    },
                 };
                 let context = context.lock().await;
                 let response = match react(context, request).await {
-                    Ok(resp) => resp,
-                    Err(e) => {
+                    | Ok(resp) => resp,
+                    | Err(e) => {
                         tracing::error!("Failed to react: {:?}", e);
                         let _ = tx.send(Err(e)).await;
                         break;
-                    }
+                    },
                 };
-                if tx.send(Ok(response)).await.is_err() {
+                if tx
+                    .send(Ok(response))
+                    .await
+                    .is_err()
+                {
                     tracing::error!("Failed to send response");
                     break;
                 }
@@ -79,17 +94,27 @@ impl Creature for MyCreature {
 
         let outgoing = ReceiverStream::new(rx);
 
-        tracing::info!("Response talk streaming: {:?}", outgoing);
+        tracing::info!(
+            "Response talk streaming: {:?}",
+            outgoing
+        );
 
-        Ok(Response::new(Box::pin(outgoing) as Self::TalkStream))
+        Ok(Response::new(
+            Box::pin(outgoing) as Self::TalkStream
+        ))
     }
 }
 
-fn build_messages(prompt: String, context: Vec<Message>) -> Vec<Message> {
+fn build_messages(
+    prompt: String,
+    context: Vec<Message>,
+) -> Vec<Message> {
     let mut messages = Vec::new();
 
     messages.push(Message {
-        role: Role::System.parse_to_string().unwrap(),
+        role: Role::System
+            .parse_to_string()
+            .unwrap(),
         content: Some(prompt),
         name: None,
         function_call: None,
@@ -102,22 +127,36 @@ fn build_messages(prompt: String, context: Vec<Message>) -> Vec<Message> {
     messages
 }
 
-#[tracing::instrument(name = "creature.talk_react", err, skip(context, talking))]
+#[tracing::instrument(
+    name = "creature.talk_react",
+    err,
+    skip(context, talking)
+)]
 async fn react(
     mut context: MutexGuard<'_, RpcContext>,
     talking: creature_rpc::Talking,
 ) -> Result<creature_rpc::State, Status> {
-    tracing::info!("Request react to talking: {:?}", talking);
+    tracing::info!(
+        "Request react to talking: {:?}",
+        talking
+    );
 
-    context.context_memory.add(Message {
-        role: Role::User.parse_to_string().unwrap(),
-        content: Some(talking.message),
-        name: None,
-        function_call: None,
-    });
+    context
+        .context_memory
+        .add(Message {
+            role: Role::User
+                .parse_to_string()
+                .unwrap(),
+            content: Some(talking.message),
+            name: None,
+            function_call: None,
+        });
 
     let context_memory = context.context_memory.get();
-    let messages = build_messages(context.prompt.clone(), context_memory.clone());
+    let messages = build_messages(
+        context.prompt.clone(),
+        context_memory.clone(),
+    );
     let functions = vec![Function::new(
         "reaction_generator".to_string(),
         Some("Generate your reaction as character of creature from conversations.".to_string()),
@@ -176,7 +215,10 @@ async fn react(
     )];
 
     let options: Options = Options {
-        model: context.model.parse_to_string().unwrap(),
+        model: context
+            .model
+            .parse_to_string()
+            .unwrap(),
         messages,
         functions: Some(functions),
         function_call: Some(FunctionCallingSpecification::Name(
@@ -194,66 +236,105 @@ async fn react(
         user: None,
     };
 
-    tracing::info!("Request complete chat to react with options: {:?}", options);
+    tracing::info!(
+        "Request complete chat to react with options: {:?}",
+        options
+    );
 
     match crate::chat_gpt_api::client::complete_chat(options).await {
-        Err(error) => {
-            tracing::error!("Failed to complete chat to react: {:?}", error);
-            Err(crate::error_mapping::map_anyhow_error_to_grpc_status(
-                anyhow::anyhow!("Failed to complete chat to react: {:?}", error),
-            ))
-        }
-        Ok(response) => match response.choices.get(0) {
-            None => {
+        | Err(error) => {
+            tracing::error!(
+                "Failed to complete chat to react: {:?}",
+                error
+            );
+            Err(
+                crate::error_mapping::map_anyhow_error_to_grpc_status(
+                    anyhow::anyhow!(
+                        "Failed to complete chat to react: {:?}",
+                        error
+                    ),
+                ),
+            )
+        },
+        | Ok(response) => match response.choices.get(0) {
+            | None => {
                 tracing::error!("No choices in response");
                 Err(Status::new(
                     tonic::Code::Internal,
                     "No choices in response".to_string(),
                 ))
-            }
-            Some(choice) => match &choice.message.function_call {
-                None => {
+            },
+            | Some(choice) => match &choice.message.function_call {
+                | None => {
                     tracing::error!("No function calling in response");
                     Err(Status::new(
                         tonic::Code::Internal,
                         "No function calling in response".to_string(),
                     ))
-                }
+                },
                 // Success
-                Some(function_call) => {
-                    context.context_memory.add(Message {
-                        role: Role::Assistant.parse_to_string().unwrap(),
-                        content: Some("".to_string()), // NOTE: Must be set some.
-                        name: choice.message.name.clone(),
-                        function_call: choice.message.function_call.clone(),
-                    });
+                | Some(function_call) => {
+                    context
+                        .context_memory
+                        .add(Message {
+                            role: Role::Assistant
+                                .parse_to_string()
+                                .unwrap(),
+                            content: Some("".to_string()), // NOTE: Must be set some.
+                            name: choice.message.name.clone(),
+                            function_call: choice
+                                .message
+                                .function_call
+                                .clone(),
+                        });
 
-                    let reaction = serde_json::from_str::<StateJson>(&function_call.arguments)
-                        .map_err(|error| {
+                    let reaction = serde_json::from_str::<StateJson>(
+                        &function_call.arguments,
+                    )
+                    .map_err(|error| {
+                        tracing::error!(
+                            "Failed to parse function calling arguments: {:?}",
+                            error
+                        );
+                        Status::new(
+                            tonic::Code::Internal,
+                            "Failed to parse function calling arguments"
+                                .to_string(),
+                        )
+                    })?;
+
+                    let emotion = Emotion::from_str_name(&reaction.emotion)
+                        .ok_or_else(|| {
                             tracing::error!(
-                                "Failed to parse function calling arguments: {:?}",
-                                error
+                                "Invalid emotion: {:?}",
+                                reaction.emotion
                             );
                             Status::new(
                                 tonic::Code::Internal,
-                                "Failed to parse function calling arguments".to_string(),
+                                "Failed to parse emotion".to_string(),
                             )
                         })?;
 
-                    let emotion = Emotion::from_str_name(&reaction.emotion).ok_or_else(|| {
-                        tracing::error!("Invalid emotion: {:?}", reaction.emotion);
-                        Status::new(tonic::Code::Internal, "Failed to parse emotion".to_string())
-                    })?;
+                    let motion = Motion::from_str_name(&reaction.motion)
+                        .ok_or_else(|| {
+                            tracing::error!(
+                                "Invalid motion: {:?}",
+                                reaction.motion
+                            );
+                            Status::new(
+                                tonic::Code::Internal,
+                                "Failed to parse motion".to_string(),
+                            )
+                        })?;
 
-                    let motion = Motion::from_str_name(&reaction.motion).ok_or_else(|| {
-                        tracing::error!("Invalid motion: {:?}", reaction.motion);
-                        Status::new(tonic::Code::Internal, "Failed to parse motion".to_string())
-                    })?;
-
-                    let cry = Cry::from_str_name(&reaction.cry).ok_or_else(|| {
-                        tracing::error!("Invalid cry: {:?}", reaction.cry);
-                        Status::new(tonic::Code::Internal, "Failed to parse cry".to_string())
-                    })?;
+                    let cry =
+                        Cry::from_str_name(&reaction.cry).ok_or_else(|| {
+                            tracing::error!("Invalid cry: {:?}", reaction.cry);
+                            Status::new(
+                                tonic::Code::Internal,
+                                "Failed to parse cry".to_string(),
+                            )
+                        })?;
 
                     let state = creature_rpc::State {
                         emotion: emotion as i32,
@@ -264,7 +345,7 @@ async fn react(
                     tracing::info!("Succeeded to react: {:?}", state);
 
                     Ok(state)
-                }
+                },
             },
         },
     }

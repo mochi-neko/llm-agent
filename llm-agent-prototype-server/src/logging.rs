@@ -22,13 +22,14 @@ pub(crate) fn initialize_logging() -> Result<()> {
         .event_format(StdLogFormatter);
 
     // Set up logging to a file
-    let (non_blocking, _guard) = non_blocking(tracing_appender::rolling::never(
-        ".logs",
-        format!(
-            "llm-agent-server-{}.log",
-            chrono::Local::now().format("%Y%m%d-%H%M%S%3f")
-        ),
-    ));
+    let (non_blocking, _guard) =
+        non_blocking(tracing_appender::rolling::never(
+            ".logs",
+            format!(
+                "llm-agent-server-{}.log",
+                chrono::Local::now().format("%Y%m%d-%H%M%S%3f")
+            ),
+        ));
 
     let file_layer = fmt::layer()
         .with_target(true)
@@ -43,7 +44,10 @@ pub(crate) fn initialize_logging() -> Result<()> {
         .with(EnvFilter::from_default_env());
 
     tracing::subscriber::set_global_default(subscriber).map_err(|error| {
-        tracing::error!("Failed to set global default subscriber: {:?}", error);
+        tracing::error!(
+            "Failed to set global default subscriber: {:?}",
+            error
+        );
         error
     })?;
 
@@ -69,7 +73,8 @@ where
         write!(
             writer,
             "{:<5} {} {} in {}",
-            color_for_log_level(*metadata.level()).paint(metadata.level().to_string()),
+            color_for_log_level(*metadata.level())
+                .paint(metadata.level().to_string()),
             color_for_weaked().paint(
                 chrono::Local::now()
                     .format("%Y-%m-%d %H:%M:%S%.3f%Z")
@@ -79,7 +84,9 @@ where
             color_for_weaked().paint(format!(
                 "{}({})",
                 metadata.target(),
-                metadata.line().unwrap_or_default()
+                metadata
+                    .line()
+                    .unwrap_or_default()
             )),
         )?;
 
@@ -99,11 +106,11 @@ where
 
 fn color_for_log_level(level: Level) -> ansi_term::Color {
     match level {
-        Level::TRACE => ansi_term::Color::Fixed(13), // Fuchsia
-        Level::DEBUG => ansi_term::Color::Fixed(14), // Aqua
-        Level::INFO => ansi_term::Color::Fixed(10),  // Lime
-        Level::WARN => ansi_term::Color::Yellow,
-        Level::ERROR => ansi_term::Color::Red,
+        | Level::TRACE => ansi_term::Color::Fixed(13), // Fuchsia
+        | Level::DEBUG => ansi_term::Color::Fixed(14), // Aqua
+        | Level::INFO => ansi_term::Color::Fixed(10),  // Lime
+        | Level::WARN => ansi_term::Color::Yellow,
+        | Level::ERROR => ansi_term::Color::Red,
     }
 }
 
@@ -160,7 +167,9 @@ where
             thread_id::get(),
             chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f%Z"),
             metadata.target(),
-            metadata.line().unwrap_or_default(),
+            metadata
+                .line()
+                .unwrap_or_default(),
         )?;
 
         // Write spans

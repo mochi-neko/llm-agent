@@ -3,7 +3,10 @@ use std::collections::VecDeque;
 
 pub(crate) trait Memory: Send + Clone {
     fn get(&self) -> Vec<Message>;
-    fn add(&mut self, message: Message);
+    fn add(
+        &mut self,
+        message: Message,
+    );
     fn clear(&mut self);
 }
 
@@ -25,13 +28,23 @@ impl FiniteQueueMemory {
 impl Memory for FiniteQueueMemory {
     fn get(&self) -> Vec<Message> {
         // Copy the memories as Vec
-        self.memories.iter().cloned().collect()
+        self.memories
+            .iter()
+            .cloned()
+            .collect()
     }
 
-    fn add(&mut self, message: Message) {
-        tracing::debug!("Adding message to memory: {:?}", message);
+    fn add(
+        &mut self,
+        message: Message,
+    ) {
+        tracing::debug!(
+            "Adding message to memory: {:?}",
+            message
+        );
 
-        self.memories.push_back(message);
+        self.memories
+            .push_back(message);
         while self.memories.len() > self.max_size {
             tracing::debug!("Memory is full, removing the oldest message");
 

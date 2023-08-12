@@ -26,5 +26,8 @@ pub(crate) fn map_anyhow_error_to_grpc_status(error: anyhow::Error) -> Status {
     }
 
     // If the error is not hyper::Error, use the error message directly.
-    Status::new(Code::Internal, format!("Internal error: {:?}", error))
+    Status::new(
+        Code::Internal,
+        format!("Internal error: {:?}", error),
+    )
 }

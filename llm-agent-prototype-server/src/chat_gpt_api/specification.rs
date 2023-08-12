@@ -17,14 +17,16 @@ pub(crate) enum Model {
 impl Model {
     pub(crate) fn parse_to_string(&self) -> Result<String> {
         match self {
-            Model::Gpt35Turbo => Ok("gpt-3.5-turbo".to_string()),
-            Model::Gpt35Turbo0613 => Ok("gpt-3.5-turbo-0613".to_string()),
-            Model::Gpt35Turbo16k => Ok("gpt-3.5-turbo-16k".to_string()),
-            Model::Gpt35Turbo16k0613 => Ok("gpt-3.5-turbo-16k-0613".to_string()),
-            Model::Gpt4 => Ok("gpt-4".to_string()),
-            Model::Gpt40613 => Ok("gpt-4-0613".to_string()),
-            Model::Gpt432k => Ok("gpt-4-32k".to_string()),
-            Model::Gpt432k0613 => Ok("gpt-4-32k-0613".to_string()),
+            | Model::Gpt35Turbo => Ok("gpt-3.5-turbo".to_string()),
+            | Model::Gpt35Turbo0613 => Ok("gpt-3.5-turbo-0613".to_string()),
+            | Model::Gpt35Turbo16k => Ok("gpt-3.5-turbo-16k".to_string()),
+            | Model::Gpt35Turbo16k0613 => {
+                Ok("gpt-3.5-turbo-16k-0613".to_string())
+            },
+            | Model::Gpt4 => Ok("gpt-4".to_string()),
+            | Model::Gpt40613 => Ok("gpt-4-0613".to_string()),
+            | Model::Gpt432k => Ok("gpt-4-32k".to_string()),
+            | Model::Gpt432k0613 => Ok("gpt-4-32k-0613".to_string()),
         }
     }
 
@@ -54,10 +56,10 @@ pub(crate) enum Role {
 impl Role {
     pub(crate) fn parse_to_string(&self) -> Result<String> {
         match self {
-            Role::System => Ok("system".to_string()),
-            Role::Assistant => Ok("assistant".to_string()),
-            Role::User => Ok("user".to_string()),
-            Role::Function => Ok("function".to_string()),
+            | Role::System => Ok("system".to_string()),
+            | Role::Assistant => Ok("assistant".to_string()),
+            | Role::User => Ok("user".to_string()),
+            | Role::Function => Ok("function".to_string()),
         }
     }
 

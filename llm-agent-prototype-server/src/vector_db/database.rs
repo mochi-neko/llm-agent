@@ -5,8 +5,9 @@ use chrono::{DateTime, Utc};
 use qdrant_client::{
     prelude::{Payload, QdrantClient},
     qdrant::{
-        vectors_config::Config, CreateCollection, Distance, Filter, PointStruct, ScoredPoint,
-        SearchPoints, Value, VectorParams, VectorsConfig,
+        vectors_config::Config, CreateCollection, Distance, Filter,
+        PointStruct, ScoredPoint, SearchPoints, Value, VectorParams,
+        VectorsConfig,
     },
 };
 
@@ -28,18 +29,31 @@ impl MetaData {
         let mut map = HashMap::new();
         map.insert(
             "datetime".to_string(),
-            Value::from(self.datetime.format("%Y-%m-%dT%H:%M:%S%.3f").to_string()),
+            Value::from(
+                self.datetime
+                    .format("%Y-%m-%dT%H:%M:%S%.3f")
+                    .to_string(),
+            ),
         );
-        map.insert("author".to_string(), Value::from(self.author.clone()));
+        map.insert(
+            "author".to_string(),
+            Value::from(self.author.clone()),
+        );
 
         Payload::new_from_hashmap(map)
     }
 }
 
 impl DataBase {
-    #[tracing::instrument(name = "vector_db.database.reset", err, skip(self, request))]
+    #[tracing::instrument(
+        name = "vector_db.database.reset",
+        err,
+        skip(self, request)
+    )]
     pub(crate) async fn reset(&self) -> Result<()> {
-        self.client.delete_collection(self.name).await?;
+        self.client
+            .delete_collection(self.name)
+            .await?;
 
         self.client
             .create_collection(&CreateCollection {
@@ -58,8 +72,16 @@ impl DataBase {
         Ok(())
     }
 
-    #[tracing::instrument(name = "vector_db.database.upsert", err, skip(self, request))]
-    pub(crate) async fn upsert(&mut self, text: &str, meta_data: MetaData) -> Result<()> {
+    #[tracing::instrument(
+        name = "vector_db.database.upsert",
+        err,
+        skip(self, request)
+    )]
+    pub(crate) async fn upsert(
+        &mut self,
+        text: &str,
+        meta_data: MetaData,
+    ) -> Result<()> {
         let embedding = embeddings::embed(text)?;
         let payload = meta_data.to_payload();
         let point = PointStruct::new(self.index, embedding, payload);
@@ -72,7 +94,11 @@ impl DataBase {
         Ok(())
     }
 
-    #[tracing::instrument(name = "vector_db.database.search", err, skip(self, request))]
+    #[tracing::instrument(
+        name = "vector_db.database.search",
+        err,
+        skip(self, request)
+    )]
     pub(crate) async fn search(
         &self,
         query: &str,
