@@ -8,12 +8,14 @@ service Creature {
 
 message Talking {
     string message = 1;
+    string author = 2;
 }
 
 message State {
     Emotion emotion = 1;
     Motion motion = 2;
     Cry cry = 3;
+    double friendliness = 4;
 }
 
 enum Emotion {

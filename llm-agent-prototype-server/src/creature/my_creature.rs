@@ -367,6 +367,7 @@ async fn react(
                         emotion: emotion as i32,
                         motion: motion as i32,
                         cry: cry as i32,
+                        friendliness: reaction.friendliness as f64,
                     };
 
                     tracing::info!("Succeeded to react: {:?}", state);
