@@ -10,6 +10,13 @@ services:
       - .env
     ports:
       - 50051:50051
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ "gpu", "utility", "compute" ]
+              driver: nvidia
+              count: 1
   qdrant:
     build:
       context: .
