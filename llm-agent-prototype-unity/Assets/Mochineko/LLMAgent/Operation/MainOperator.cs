@@ -17,6 +17,9 @@ namespace Mochineko.LLMAgent.Operation
     internal sealed class MainOperator : MonoBehaviour
     {
         [SerializeField]
+        private string author = "Mochineko";
+
+        [SerializeField]
         private TMP_InputField? messageInput = null;
 
         [SerializeField]
@@ -87,7 +90,8 @@ namespace Mochineko.LLMAgent.Operation
 
             client?.Send(new Talking
                     {
-                        Message = messageInput.text
+                        Message = messageInput.text,
+                        Author = author,
                     },
                     this.GetCancellationTokenOnDestroy())
                 .Forget();
@@ -100,8 +104,8 @@ namespace Mochineko.LLMAgent.Operation
                 throw new NullReferenceException(nameof(animator));
             }
 
-            Log.Info("[LLMAgent.Operation] Received state: {0}, {1}, {2}",
-                state.Emotion, state.Motion, state.Cry);
+            Log.Info("[LLMAgent.Operation] Received state: {0}, {1}, {2}, {3}",
+                state.Emotion, state.Motion, state.Cry, state.Friendliness);
 
             if (unicornMotionMap.TryGetValue(state.Motion, out var motionIndex))
             {
