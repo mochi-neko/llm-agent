@@ -104,7 +104,7 @@ namespace Mochineko.LLMAgent.Operation
                 throw new NullReferenceException(nameof(animator));
             }
 
-            Log.Info("[LLMAgent.Operation] Received state: {0}, {1}, {2}, {3}",
+            Log.Info("[LLMAgent.Operation] Received state: Emotion = {0}, Motion = {1}, Cry = {2}, Friendliness = {3}",
                 state.Emotion, state.Motion, state.Cry, state.Friendliness);
 
             if (unicornMotionMap.TryGetValue(state.Motion, out var motionIndex))

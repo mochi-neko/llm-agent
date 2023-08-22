@@ -194,8 +194,8 @@ namespace Mochineko.LLMAgent.Creature
 
                 var state = call.ResponseStream.Current;
 
-                Log.Info("[LLMAgent.Creature] Received state: {0}, {1}, {2}",
-                    state.Emotion, state.Motion, state.Cry);
+                Log.Info("[LLMAgent.Creature] Received state: Emotion = {0}, Motion = {1}, Cry = {2}, Friendliness = {3}",
+                    state.Emotion, state.Motion, state.Cry, state.Friendliness);
 
                 onStateReceived.OnNext(state);
             }
