@@ -10,10 +10,11 @@ use crate::chat_gpt_api::specification::{
     Function, FunctionCallingSpecification, Message, Options, Role,
 };
 use crate::rpc_context::RpcContext;
-use crate::vector_db::database::MetaData;
+use crate::vector_db::database::{self, Record};
 use creature_rpc::creature_server::Creature;
 use creature_rpc::{Cry, Emotion, Motion};
 use futures::stream::StreamExt;
+use qdrant_client::qdrant::ScoredPoint;
 use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -45,7 +46,7 @@ impl Creature for MyCreature {
         >,
     >;
 
-    // grpcurl -plaintext -d '{ "message": "おはよう!" }' localhost:8000 creature.Creature/Talk
+    // grpcurl -plaintext -d '{ "message": "おはよう!", "author": "Mochineko" }' 127.0.0.1:50051 creature.Creature/Talk
     #[tracing::instrument(
         name = "creature.talk",
         err,
@@ -109,6 +110,7 @@ impl Creature for MyCreature {
 
 fn build_messages(
     prompt: String,
+    memory: String,
     context: Vec<Message>,
 ) -> Vec<Message> {
     let mut messages = Vec::new();
@@ -117,7 +119,10 @@ fn build_messages(
         role: Role::System
             .parse_to_string()
             .unwrap(),
-        content: Some(prompt),
+        content: Some(format!(
+            "{}\nRelated memories:\n{}",
+            prompt, memory
+        )),
         name: None,
         function_call: None,
     });
@@ -143,6 +148,22 @@ async fn react(
         talking
     );
 
+    let related_memories = context
+        .long_memory
+        .search(talking.message.clone(), 10, None)
+        .await
+        .map_err(|error| {
+            tracing::error!(
+                "Failed to search related memories: {:?}",
+                error
+            );
+            Status::new(
+                tonic::Code::Internal,
+                "Failed to search related memories".to_string(),
+            )
+        })?;
+    let combined_related_memories = combine_to_string(related_memories);
+
     context
         .context_memory
         .add(Message {
@@ -156,10 +177,10 @@ async fn react(
 
     context
         .long_memory
-        .upsert(
+        .upsert(database::Record::new(
             talking.message,
-            MetaData::new("Mochineko".to_string()), // TODO: Set author from parameters.
-        )
+            talking.author,
+        ))
         .await
         .map_err(|error| {
             tracing::error!(
@@ -175,6 +196,7 @@ async fn react(
     let context_memory = context.context_memory.get();
     let messages = build_messages(
         context.prompt.clone(),
+        combined_related_memories,
         context_memory.clone(),
     );
     let functions = vec![Function::new(
@@ -367,7 +389,7 @@ async fn react(
                         emotion: emotion as i32,
                         motion: motion as i32,
                         cry: cry as i32,
-                        friendliness: reaction.friendliness as f64,
+                        friendliness: reaction.friendliness,
                     };
 
                     tracing::info!("Succeeded to react: {:?}", state);
@@ -377,4 +399,18 @@ async fn react(
             },
         },
     }
+}
+
+fn combine_to_string(points: Vec<ScoredPoint>) -> String {
+    let mut result = String::new();
+
+    for point in points {
+        let record = Record::from_payload(point.payload);
+        result += &format!(
+            "  - {} (score: {})\n",
+            record.text, point.score
+        );
+    }
+
+    result
 }

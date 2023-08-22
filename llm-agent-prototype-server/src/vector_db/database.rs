@@ -14,14 +14,19 @@ use qdrant_client::{
 use crate::vector_db::embeddings;
 
 #[derive(Debug)]
-pub(crate) struct MetaData {
+pub(crate) struct Record {
+    pub(crate) text: String,
     pub(crate) datetime: DateTime<Utc>,
     pub(crate) author: String,
 }
 
-impl MetaData {
-    pub(crate) fn new(author: String) -> Self {
+impl Record {
+    pub(crate) fn new(
+        text: String,
+        author: String,
+    ) -> Self {
         Self {
+            text,
             datetime: Utc::now(),
             author,
         }
@@ -29,6 +34,12 @@ impl MetaData {
 
     fn to_payload(&self) -> Payload {
         let mut map = HashMap::new();
+
+        map.insert(
+            "text".to_string(),
+            Value::from(self.text.clone()),
+        );
+
         map.insert(
             "datetime".to_string(),
             Value::from(
@@ -37,12 +48,42 @@ impl MetaData {
                     .to_string(),
             ),
         );
+
         map.insert(
             "author".to_string(),
             Value::from(self.author.clone()),
         );
 
         Payload::new_from_hashmap(map)
+    }
+
+    pub(crate) fn from_payload(payload: HashMap<String, Value>) -> Self {
+        let text = payload
+            .get("text")
+            .unwrap()
+            .to_string()
+            .parse::<String>()
+            .unwrap();
+
+        let datetime = payload
+            .get("datetime")
+            .unwrap()
+            .to_string()
+            .parse::<DateTime<Utc>>()
+            .unwrap();
+
+        let author = payload
+            .get("author")
+            .unwrap()
+            .to_string()
+            .parse::<String>()
+            .unwrap();
+
+        Self {
+            text,
+            datetime,
+            author,
+        }
     }
 }
 
@@ -114,26 +155,28 @@ impl DataBase {
     #[tracing::instrument(
         name = "vector_db.database.upsert",
         err,
-        skip(self, text, meta_data)
+        skip(self, record)
     )]
     pub(crate) async fn upsert(
         &mut self,
-        text: String,
-        meta_data: MetaData,
+        record: Record,
     ) -> Result<()> {
-        let embedding = embeddings::embed(text.clone())
+        let embedding = embeddings::embed(record.text.clone())
             .await
             .map_err(|error| {
                 tracing::error!("Failed to embed text: {:?}", error);
                 error
             })?;
-        let vector = embedding[0].clone();
-        let payload = meta_data.to_payload();
-        let point = PointStruct::new(self.index, vector, payload);
-        self.index += 1;
+        let payload = record.to_payload();
+        let mut points = Vec::new();
+        for vector in embedding {
+            let point = PointStruct::new(self.index, vector, payload.clone());
+            self.index += 1;
+            points.push(point);
+        }
 
         self.client
-            .upsert_points(self.name.clone(), vec![point], None)
+            .upsert_points(self.name.clone(), points, None)
             .await
             .map_err(|error| {
                 tracing::error!("Failed to upsert points: {:?}", error);
@@ -142,7 +185,7 @@ impl DataBase {
 
         tracing::info!(
             "Upserted {} to {} successfully",
-            text,
+            record.text,
             self.name
         );
         Ok(())
