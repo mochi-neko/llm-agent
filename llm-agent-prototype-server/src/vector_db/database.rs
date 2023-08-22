@@ -90,7 +90,6 @@ impl Record {
 pub(crate) struct DataBase {
     pub(crate) client: QdrantClient,
     pub(crate) name: String,
-    pub(crate) index: u64,
 }
 
 impl std::fmt::Debug for DataBase {
@@ -101,35 +100,22 @@ impl std::fmt::Debug for DataBase {
         f.debug_struct("DataBase")
             .field("client", &self.client.cfg.uri)
             .field("name", &self.name)
-            .field("index", &self.index)
             .finish()
     }
 }
 
 impl DataBase {
-    #[tracing::instrument(
-        name = "vector_db.database.reset",
-        err,
-        skip(self)
-    )]
-    pub(crate) async fn reset(&self) -> Result<()> {
-        self.client
-            .delete_collection(self.name.to_string())
-            .await
-            .map_err(|error| {
-                tracing::error!(
-                    "Failed to delete collection: {:?}",
-                    error
-                );
-                error
-            })?;
-
-        self.client
+    pub(crate) async fn new(
+        client: QdrantClient,
+        name: String,
+        dimension: u64,
+    ) -> Result<DataBase> {
+        client
             .create_collection(&CreateCollection {
-                collection_name: self.name.to_string(),
+                collection_name: name.to_string(),
                 vectors_config: Some(VectorsConfig {
                     config: Some(Config::Params(VectorParams {
-                        size: 10,
+                        size: dimension,
                         distance: Distance::Cosine.into(),
                         ..Default::default()
                     })),
@@ -145,11 +131,10 @@ impl DataBase {
                 error
             })?;
 
-        tracing::info!(
-            "Reset database of {} successfully",
-            self.name
-        );
-        Ok(())
+        Ok(DataBase {
+            client,
+            name,
+        })
     }
 
     #[tracing::instrument(
@@ -170,8 +155,11 @@ impl DataBase {
         let payload = record.to_payload();
         let mut points = Vec::new();
         for vector in embedding {
-            let point = PointStruct::new(self.index, vector, payload.clone());
-            self.index += 1;
+            let point = PointStruct::new(
+                uuid::Uuid::new_v4().to_string(),
+                vector,
+                payload.clone(),
+            );
             points.push(point);
         }
 

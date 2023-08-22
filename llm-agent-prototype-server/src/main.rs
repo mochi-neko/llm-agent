@@ -11,6 +11,7 @@ use crate::chat_gpt_api::specification::Model;
 use crate::creature::my_creature::creature_rpc::creature_server::CreatureServer;
 use crate::creature::my_creature::MyCreature;
 use crate::rpc_context::RpcContext;
+use crate::vector_db::embeddings;
 use qdrant_client::prelude::QdrantClient;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -41,7 +42,7 @@ async fn main() -> anyhow::Result<()> {
     let model = Model::Gpt35Turbo0613;
     let prompt = "Your are an AI assistant.".to_string();
     let context_memory = FiniteQueueMemory::new(10);
-    let qdrant_client = QdrantClient::from_url("http://127.0.0.1:6334")
+    let qdrant_client = QdrantClient::from_url("http://qdrant:6334")
         .build()
         .map_err(|error| {
             tracing::error!(
@@ -50,11 +51,35 @@ async fn main() -> anyhow::Result<()> {
             );
             error
         })?;
-    let long_memory = DataBase {
-        client: qdrant_client,
-        name: "long_memory".to_string(),
-        index: 0,
-    };
+    qdrant_client
+        .health_check()
+        .await
+        .map_err(|error| {
+            tracing::error!(
+                "Failed to check qdrant health: {:?}",
+                error
+            );
+            error
+        })?;
+    let dimension = embeddings::get_dimension()
+        .await
+        .map_err(|error| {
+            tracing::error!("Failed to get dimension: {:?}", error);
+            error
+        })?;
+    let long_memory = DataBase::new(
+        qdrant_client,
+        "long_memory".to_string(),
+        dimension,
+    )
+    .await
+    .map_err(|error| {
+        tracing::error!(
+            "Failed to create long memory: {:?}",
+            error
+        );
+        error
+    })?;
     let rpc_context = Arc::new(Mutex::new(RpcContext {
         model,
         prompt,
