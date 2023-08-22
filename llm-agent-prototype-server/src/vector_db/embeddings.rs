@@ -66,6 +66,11 @@ pub(crate) async fn get_dimension() -> Result<u64> {
                     );
                     error
                 })?;
+            if dimension < 1 {
+                return Err(anyhow::anyhow!(
+                    "Dimension is less than 1"
+                ));
+            }
 
             Ok(dimension as u64)
         })
