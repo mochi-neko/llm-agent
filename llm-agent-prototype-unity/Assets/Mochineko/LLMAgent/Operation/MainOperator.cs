@@ -5,6 +5,7 @@ using Cysharp.Net.Http;
 using Cysharp.Threading.Tasks;
 using Mochineko.LLMAgent.Creature;
 using Mochineko.LLMAgent.Creature.Generated;
+using SatorImaging.AppWindowUtility;
 using TMPro;
 using UniRx;
 using Unity.Logging;
@@ -40,6 +41,9 @@ namespace Mochineko.LLMAgent.Operation
         private void Awake()
         {
             Logging.Initialize();
+
+            AppWindowUtility.Transparent = true;
+            AppWindowUtility.AlwaysOnTop = true;
         }
 
         private void Start()

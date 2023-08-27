@@ -456,7 +456,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 378949230}
-  m_LocalRotation: {x: 0.10369777, y: 0.5011013, z: -0.060632918, w: 0.8570111}
+  m_LocalRotation: {x: 0.01141786, y: 0.9882642, z: -0.1195793, w: 0.09436299}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -855,8 +855,8 @@ Camera:
   m_GameObject: {fileID: 589419014}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -904,8 +904,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 589419014}
-  m_LocalRotation: {x: 0.079109535, y: 0.5026324, z: -0.046255995, w: 0.85962945}
-  m_LocalPosition: {x: -1.1329159, y: 0.4, z: -0.63757485}
+  m_LocalRotation: {x: 0.0087105185, y: 0.99128366, z: -0.09122535, w: 0.094651274}
+  m_LocalPosition: {x: -0.24601422, y: 0.4, z: 1.2765096}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1154,7 +1154,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 662235496}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.1329159, y: 0.4, z: -0.63757485}
+  m_LocalPosition: {x: -0.24601422, y: 0.4, z: 1.2765096}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1778,7 +1778,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1039265070}
-  m_LocalRotation: {x: 0.1283636, y: 0.4991449, z: -0.07505524, w: 0.853665}
+  m_LocalRotation: {x: 0.014133736, y: 0.9844057, z: -0.14802276, w: 0.09399452}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2123,6 +2123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6738dd81cd92c4c448e0f2af89e0c04f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  author: Mochineko
   messageInput: {fileID: 427717130}
   sendMessageButton: {fileID: 869438725}
   animator: {fileID: 522700804}
@@ -2338,7 +2339,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2064603699}
-  m_LocalRotation: {x: 0.07910954, y: 0.5026323, z: -0.046255983, w: 0.85962945}
+  m_LocalRotation: {x: 0.008710518, y: 0.99128366, z: -0.091225326, w: 0.094651274}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
