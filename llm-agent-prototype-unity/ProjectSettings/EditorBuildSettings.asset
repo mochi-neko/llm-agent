@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Mochineko/LLMAgent/Operation/MainScene.unity
+    guid: ed94fcfe017b9434b91285450bdd9b44
   m_configObjects: {}
