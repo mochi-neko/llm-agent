@@ -55,6 +55,7 @@ namespace Mochineko.LLMAgent.Operation
             AppWindowUtility.Transparent = true;
             AppWindowUtility.AlwaysOnTop = true;
             AppWindowUtility.FrameVisibility = false;
+            AppWindowUtility.ClickThrough = false;
         }
 
         private void Start()
@@ -93,12 +94,22 @@ namespace Mochineko.LLMAgent.Operation
 
             inputToggle
                 .OnClickAsObservable()
-                .Subscribe(_ => inputParent.SetActive(!inputParent.activeSelf))
+                .Subscribe(_ =>
+                {
+                    Log.Info("[LLMAgent.Operation] On click input toggle button.");
+
+                    Log.Info("[LLMAgent.Operation] Toggle into {0}", !inputParent.activeSelf ? "On" : "Off");
+                    inputParent.SetActive(!inputParent.activeSelf);
+                })
                 .AddTo(this);
 
             sendMessageButton
                 .OnClickAsObservable()
-                .Subscribe(_ => SendMessage())
+                .Subscribe(_ =>
+                {
+                    Log.Info("[LLMAgent.Operation] On click send message button.");
+                    SendMessage();
+                })
                 .AddTo(this);
         }
 
