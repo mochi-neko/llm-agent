@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Net.Http;
 using Cysharp.Threading.Tasks;
 using Mochineko.LLMAgent.Creature;
@@ -40,6 +41,15 @@ namespace Mochineko.LLMAgent.Operation
         private EmotionController? emotionController = null;
 
         private CreatureClient? client;
+        private CancellationTokenSource? cancellationTokenSource;
+
+        private static readonly State IdleState = new()
+        {
+            Emotion = Creature.Generated.Emotion.Neutral,
+            Motion = Motion.Neutral,
+            Cry = Cry.None,
+            Friendliness = 0f,
+        };
 
         private const string Address = "https://127.0.0.1:50051";
 
@@ -98,7 +108,25 @@ namespace Mochineko.LLMAgent.Operation
 
             client
                 .OnStateReceived
-                .Subscribe(OnStateReceived)
+                .Subscribe(state =>
+                {
+                    Log.Info("[LLMAgent.Operation] Received state: Emotion = {0}, Motion = {1}, Cry = {2}, Friendliness = {3}",
+                        state.Emotion, state.Motion, state.Cry, state.Friendliness);
+
+                    if (cancellationTokenSource != null)
+                    {
+                        cancellationTokenSource.Cancel();
+                        cancellationTokenSource.Dispose();
+                        cancellationTokenSource = null;
+                    }
+
+                    cancellationTokenSource = new();
+
+                    ChangeState(state);
+
+                    AutoReturnToIdleStateAsync(cancellationTokenSource.Token)
+                        .Forget();
+                })
                 .AddTo(this);
 
             inputToggle
@@ -124,6 +152,8 @@ namespace Mochineko.LLMAgent.Operation
 
         private void OnDestroy()
         {
+            cancellationTokenSource?.Cancel();
+            cancellationTokenSource?.Dispose();
             client?.Dispose();
             Log.FlushAll();
         }
@@ -148,7 +178,7 @@ namespace Mochineko.LLMAgent.Operation
                 .Forget();
         }
 
-        private void OnStateReceived(State state)
+        private void ChangeState(State state)
         {
             if (animator == null)
             {
@@ -159,9 +189,6 @@ namespace Mochineko.LLMAgent.Operation
             {
                 throw new NullReferenceException(nameof(emotionController));
             }
-
-            Log.Info("[LLMAgent.Operation] Received state: Emotion = {0}, Motion = {1}, Cry = {2}, Friendliness = {3}",
-                state.Emotion, state.Motion, state.Cry, state.Friendliness);
 
             if (unicornMotionMap.TryGetValue(state.Motion, out var motionIndex))
             {
@@ -188,5 +215,25 @@ namespace Mochineko.LLMAgent.Operation
             [Motion.Attack] = 8,
             [Motion.Eating] = 7,
         };
+
+        private async UniTask AutoReturnToIdleStateAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await UniTask.SwitchToThreadPool();
+
+            await UniTask
+                .Delay(TimeSpan.FromSeconds(10), cancellationToken: cancellationToken)
+                .SuppressCancellationThrow();
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            await UniTask.SwitchToMainThread(cancellationToken);
+
+            ChangeState(IdleState);
+        }
     }
 }

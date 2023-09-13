@@ -2618,7 +2618,7 @@ MonoBehaviour:
   messageInput: {fileID: 427717130}
   sendMessageButton: {fileID: 869438725}
   animator: {fileID: 1840792664}
-  emotionController: {fileID: 0}
+  emotionController: {fileID: 1681614120}
 --- !u!4 &1681614118
 Transform:
   m_ObjectHideFlags: 0
