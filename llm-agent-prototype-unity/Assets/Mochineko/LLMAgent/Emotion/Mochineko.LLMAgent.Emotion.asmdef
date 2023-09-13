@@ -1,0 +1,16 @@
+{
+    "name": "Mochineko.LLMAgent.Emotion",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e3cdc7308cc2cda4dbc4963d99bc6d64"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

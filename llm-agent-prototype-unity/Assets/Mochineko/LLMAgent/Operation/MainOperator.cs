@@ -5,6 +5,7 @@ using Cysharp.Net.Http;
 using Cysharp.Threading.Tasks;
 using Mochineko.LLMAgent.Creature;
 using Mochineko.LLMAgent.Creature.Generated;
+using Mochineko.LLMAgent.Emotion;
 using SatorImaging.AppWindowUtility;
 using TMPro;
 using UniRx;
@@ -34,6 +35,9 @@ namespace Mochineko.LLMAgent.Operation
 
         [SerializeField]
         private Animator? animator = null;
+
+        [SerializeField]
+        private EmotionController? emotionController = null;
 
         private CreatureClient? client;
 
@@ -83,6 +87,11 @@ namespace Mochineko.LLMAgent.Operation
             if (animator == null)
             {
                 throw new NullReferenceException(nameof(animator));
+            }
+
+            if (emotionController == null)
+            {
+                throw new NullReferenceException(nameof(emotionController));
             }
 
             client = new CreatureClient(Address, httpHandler);
@@ -146,6 +155,11 @@ namespace Mochineko.LLMAgent.Operation
                 throw new NullReferenceException(nameof(animator));
             }
 
+            if (emotionController == null)
+            {
+                throw new NullReferenceException(nameof(emotionController));
+            }
+
             Log.Info("[LLMAgent.Operation] Received state: Emotion = {0}, Motion = {1}, Cry = {2}, Friendliness = {3}",
                 state.Emotion, state.Motion, state.Cry, state.Friendliness);
 
@@ -157,6 +171,8 @@ namespace Mochineko.LLMAgent.Operation
             {
                 animator.SetInteger(animationId, value: 2);
             }
+
+            emotionController.SetEmotion(state.Emotion);
         }
 
         private static readonly IReadOnlyDictionary<Motion, int> unicornMotionMap = new Dictionary<Motion, int>
