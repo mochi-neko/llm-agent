@@ -71,6 +71,7 @@ async fn main() -> anyhow::Result<()> {
         qdrant_client,
         "long_memory".to_string(),
         dimension,
+        true, // Reset to develop
     )
     .await
     .map_err(|error| {

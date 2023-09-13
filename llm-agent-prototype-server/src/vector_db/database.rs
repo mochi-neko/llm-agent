@@ -109,27 +109,54 @@ impl DataBase {
         client: QdrantClient,
         name: String,
         dimension: u64,
+        reset: bool,
     ) -> Result<DataBase> {
-        client
-            .create_collection(&CreateCollection {
-                collection_name: name.to_string(),
-                vectors_config: Some(VectorsConfig {
-                    config: Some(Config::Params(VectorParams {
-                        size: dimension,
-                        distance: Distance::Cosine.into(),
-                        ..Default::default()
-                    })),
-                }),
-                ..Default::default()
-            })
+        let has_collection = client
+            .has_collection(name.clone())
             .await
             .map_err(|error| {
                 tracing::error!(
-                    "Failed to create collection: {:?}",
+                    "Failed to check collection: {:?}",
                     error
                 );
                 error
             })?;
+
+        if reset & has_collection {
+            client
+                .delete_collection(name.clone())
+                .await
+                .map_err(|error| {
+                    tracing::error!(
+                        "Failed to delete collection: {:?}",
+                        error
+                    );
+                    error
+                })?;
+        }
+
+        if reset || !has_collection {
+            client
+                .create_collection(&CreateCollection {
+                    collection_name: name.clone(),
+                    vectors_config: Some(VectorsConfig {
+                        config: Some(Config::Params(VectorParams {
+                            size: dimension,
+                            distance: Distance::Cosine.into(),
+                            ..Default::default()
+                        })),
+                    }),
+                    ..Default::default()
+                })
+                .await
+                .map_err(|error| {
+                    tracing::error!(
+                        "Failed to create collection: {:?}",
+                        error
+                    );
+                    error
+                })?;
+        }
 
         Ok(DataBase {
             client,
