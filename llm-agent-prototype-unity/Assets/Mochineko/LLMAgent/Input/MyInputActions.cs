@@ -37,6 +37,24 @@ namespace Mochineko.LLMAgent.Input
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Grab"",
+                    ""type"": ""Button"",
+                    ""id"": ""c387600b-c8d3-446b-b53c-e557a03c378f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=2)"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""GrabDelta"",
+                    ""type"": ""Value"",
+                    ""id"": ""ce643140-8a8b-4c5e-9147-8a104b58bd75"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -94,6 +112,28 @@ namespace Mochineko.LLMAgent.Input
                     ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""80b2c7f8-c369-4948-a097-3ae0093b99fd"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""GrabDelta"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9a37a0eb-53e9-4b5a-b9f6-e56419ff4280"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Grab"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -680,6 +720,8 @@ namespace Mochineko.LLMAgent.Input
             // Player
             m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
             m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
+            m_Player_Grab = m_Player.FindAction("Grab", throwIfNotFound: true);
+            m_Player_GrabDelta = m_Player.FindAction("GrabDelta", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -754,11 +796,15 @@ namespace Mochineko.LLMAgent.Input
         private readonly InputActionMap m_Player;
         private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
         private readonly InputAction m_Player_Look;
+        private readonly InputAction m_Player_Grab;
+        private readonly InputAction m_Player_GrabDelta;
         public struct PlayerActions
         {
             private @MyInputActions m_Wrapper;
             public PlayerActions(@MyInputActions wrapper) { m_Wrapper = wrapper; }
             public InputAction @Look => m_Wrapper.m_Player_Look;
+            public InputAction @Grab => m_Wrapper.m_Player_Grab;
+            public InputAction @GrabDelta => m_Wrapper.m_Player_GrabDelta;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -771,6 +817,12 @@ namespace Mochineko.LLMAgent.Input
                 @Look.started += instance.OnLook;
                 @Look.performed += instance.OnLook;
                 @Look.canceled += instance.OnLook;
+                @Grab.started += instance.OnGrab;
+                @Grab.performed += instance.OnGrab;
+                @Grab.canceled += instance.OnGrab;
+                @GrabDelta.started += instance.OnGrabDelta;
+                @GrabDelta.performed += instance.OnGrabDelta;
+                @GrabDelta.canceled += instance.OnGrabDelta;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -778,6 +830,12 @@ namespace Mochineko.LLMAgent.Input
                 @Look.started -= instance.OnLook;
                 @Look.performed -= instance.OnLook;
                 @Look.canceled -= instance.OnLook;
+                @Grab.started -= instance.OnGrab;
+                @Grab.performed -= instance.OnGrab;
+                @Grab.canceled -= instance.OnGrab;
+                @GrabDelta.started -= instance.OnGrabDelta;
+                @GrabDelta.performed -= instance.OnGrabDelta;
+                @GrabDelta.canceled -= instance.OnGrabDelta;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -961,6 +1019,8 @@ namespace Mochineko.LLMAgent.Input
         public interface IPlayerActions
         {
             void OnLook(InputAction.CallbackContext context);
+            void OnGrab(InputAction.CallbackContext context);
+            void OnGrabDelta(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {

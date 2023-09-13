@@ -16,10 +16,11 @@ namespace Mochineko.LLMAgent.Operation
         private void Start()
         {
             myInputActions = new MyInputActions();
+            myInputActions.Enable();
 
             myInputActions
-                .UI
-                .RightClick
+                .Player
+                .Grab
                 .ObserveEveryValueChanged(actions => actions.IsPressed())
                 .Subscribe(isPressed =>
                 {
@@ -47,14 +48,14 @@ namespace Mochineko.LLMAgent.Operation
             }
 
             var position = myInputActions
-                .UI
-                .TrackedDevicePosition
+                .Player
+                .GrabDelta
                 .ReadValue<Vector2>();
             Log.Debug("[LLMAgent.Operation] position: {0}", position);
 
             AppWindowUtility.MoveWindowRelative(
                 (int)position.x,
-                (int)position.y
+                -(int)position.y
             );
         }
     }
